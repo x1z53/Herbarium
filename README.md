@@ -60,22 +60,31 @@ go build
 
 ## Configuration
 
-The configuration file is created automatically on first launch: `mods.yaml`.
+On first launch, the program automatically creates two files:
 
-Example:
+`config.yaml` — program configuration
+
+Contains game launch and path settings.
 
 ```yaml
 game_exe: /usr/bin/steam
 args:
   - -applaunch
   - "331470"
-workshop_root: /path/to/SteamLibrary/.../331470
+workshop_root: /home/user/.steam/steam/steamapps/workshop/content/331470
 disabled_dir: /home/user/.elmod_disabled
+```
+
+`mods_db.yaml` — mods database
+Stores detected mods and their state.
+
+```yaml
 mods:
   - name: Example Mod
     codename: example
-    folder: 1234567890
+    folder: "1234567890"
     enabled: true
+    discovered_at: 2024-12-17T13:42:11Z
 ```
 
 ---

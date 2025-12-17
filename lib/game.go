@@ -12,9 +12,9 @@ import (
 	"time"
 )
 
-func getDisabledDir(db *DB) string {
+func getDisabledDir(cfg *Config) string {
 	homeDir, _ := os.UserHomeDir()
-	dir := db.DisabledDir
+	dir := cfg.DisabledDir
 	if dir == "" {
 		dir = filepath.Join(homeDir, ".elmod_disabled")
 	}
@@ -73,9 +73,9 @@ func copyDir(src, dst string) error {
 	return nil
 }
 
-func moveDisabledMods(db *DB) (moved [][2]string, err error) {
-	root := db.Root
-	disdir := getDisabledDir(db)
+func moveDisabledMods(db *ModsDB, cfg *Config) (moved [][2]string, err error) {
+	root := cfg.Root
+	disdir := getDisabledDir(cfg)
 
 	if err := os.MkdirAll(disdir, 0755); err != nil {
 		return nil, err
@@ -171,8 +171,8 @@ func launchGame(exe string, args []string) error {
 	return nil
 }
 
-func LaunchWithMods(db *DB) {
-	moved, err := moveDisabledMods(db)
+func LaunchWithMods(cfg *Config, db *ModsDB) {
+	moved, err := moveDisabledMods(db, cfg)
 	if err != nil {
 		fmt.Println("error disabling mods:", err)
 		os.Exit(1)
@@ -196,7 +196,7 @@ func LaunchWithMods(db *DB) {
 		os.Exit(1)
 	}()
 
-	if err := launchGame(db.GameExe, db.Args); err != nil {
+	if err := launchGame(cfg.GameExe, cfg.Args); err != nil {
 		fmt.Println("game launch error:", err)
 	}
 

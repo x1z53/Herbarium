@@ -9,12 +9,14 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 )
 
-func ScanAndUpdate(db *DB) {
-	root := db.Root
+func ScanAndUpdate(cfg *Config, db *ModsDB) {
+	root := cfg.Root
 	if root == "" {
-		root = "/mnt/ssd2tb/SteamLibrary/steamapps/workshop/content/331470"
+		log.Println("scan skipped: workshop_root is empty")
+		return
 	}
 
 	entries, err := os.ReadDir(root)
@@ -24,8 +26,8 @@ func ScanAndUpdate(db *DB) {
 	}
 
 	type result struct {
-		Folder string
-		Entry  ModEntry
+		folder string
+		entry  ModEntry
 	}
 
 	results := make(chan result, len(entries))
@@ -33,24 +35,25 @@ func ScanAndUpdate(db *DB) {
 	sem := make(chan struct{}, 10)
 
 	existingFolders := map[string]bool{}
+	existingMods := map[string]ModEntry{}
+
+	for _, m := range db.Mods {
+		existingMods[m.Folder] = m
+	}
+
 	for _, e := range entries {
 		if !e.IsDir() {
 			continue
 		}
+
 		folder := e.Name()
-		if folder == filepath.Base(getDisabledDir(db)) || strings.HasPrefix(folder, ".") {
+		if strings.HasPrefix(folder, ".") {
 			continue
 		}
+
 		existingFolders[folder] = true
 
-		skip := false
-		for _, m := range db.Mods {
-			if m.Folder == folder && m.Name != "" {
-				skip = true
-				break
-			}
-		}
-		if skip {
+		if _, ok := existingMods[folder]; ok {
 			continue
 		}
 
@@ -61,17 +64,16 @@ func ScanAndUpdate(db *DB) {
 			defer func() { <-sem }()
 
 			fullPath := filepath.Join(root, folder)
-			log.Println("Processing folder:", folder)
-			codename, pretty := extractFromFolder(fullPath)
-			log.Printf("Result for %s -> codename: %s, name: %s\n", folder, codename, pretty)
+			codename, name := extractFromFolder(fullPath)
 
 			results <- result{
-				Folder: folder,
-				Entry: ModEntry{
-					Name:     pretty,
-					CodeName: codename,
-					Folder:   folder,
-					Enabled:  true,
+				folder: folder,
+				entry: ModEntry{
+					Name:         name,
+					CodeName:     codename,
+					Folder:       folder,
+					Enabled:      true,
+					DiscoveredAt: time.Now().UTC(),
 				},
 			}
 		}(folder)
@@ -84,32 +86,31 @@ func ScanAndUpdate(db *DB) {
 
 	found := map[string]ModEntry{}
 	for r := range results {
-		found[r.Folder] = r.Entry
+		found[r.folder] = r.entry
 	}
 
-	newList := []ModEntry{}
-	seen := map[string]bool{}
+	newList := make([]ModEntry, 0, len(existingFolders))
 
 	for _, m := range db.Mods {
 		if !existingFolders[m.Folder] {
-			log.Println("Removing missing folder from DB:", m.Folder)
+			log.Println("removing missing mod:", m.Folder)
 			continue
 		}
-		if existing, ok := found[m.Folder]; ok {
+
+		if fresh, ok := found[m.Folder]; ok {
+			fresh.Enabled = m.Enabled
+			fresh.DiscoveredAt = m.DiscoveredAt
 			if m.Name != "" {
-				existing.Name = m.Name
+				fresh.Name = m.Name
 			}
-			existing.Enabled = m.Enabled
-			newList = append(newList, existing)
-			seen[m.Folder] = true
+			newList = append(newList, fresh)
 		} else {
 			newList = append(newList, m)
-			seen[m.Folder] = true
 		}
 	}
 
 	for folder, m := range found {
-		if !seen[folder] {
+		if _, ok := existingMods[folder]; !ok {
 			newList = append(newList, m)
 		}
 	}

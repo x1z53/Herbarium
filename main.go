@@ -2,32 +2,45 @@ package main
 
 import (
 	"context"
-	"esmodmanager/lib"
-
 	"fmt"
-
 	"os"
+
+	"esmodmanager/lib"
 
 	"github.com/urfave/cli/v3"
 )
 
 func main() {
-	const cfgPath = "mods.yaml"
+	const (
+		configPath = "config.yaml"
+		dbPath     = "mods_db.yaml"
+	)
 
 	cmd := &cli.Command{
 		Name:  "esmodmanager",
 		Usage: "Manager for Everlasting Summer mods",
 		Commands: []*cli.Command{
 			{
-				Name:  "list",
-				Usage: "List known mods",
+				Name:    "list",
+				Aliases: []string{"ls"},
+				Usage:   "List known mods",
 				Action: func(ctx context.Context, c *cli.Command) error {
-					db, err := lib.EnsureDB(cfgPath)
+					cfg, err := lib.EnsureConfig(configPath)
 					if err != nil {
 						return err
 					}
-					lib.ScanAndUpdate(db)
-					lib.SaveDB(cfgPath, db)
+
+					db, err := lib.EnsureModsDB(dbPath)
+					if err != nil {
+						return err
+					}
+
+					lib.ScanAndUpdate(cfg, db)
+
+					if err := lib.SaveModsDB(dbPath, db); err != nil {
+						return err
+					}
+
 					lib.PrintMods(db)
 					return nil
 				},
@@ -35,38 +48,50 @@ func main() {
 
 			{
 				Name:      "disable",
+				Aliases:   []string{"d"},
 				Usage:     "Disable mod by numeric folder, codename, or ALL",
 				ArgsUsage: "<id>",
 				Action: func(ctx context.Context, c *cli.Command) error {
-					return lib.ToggleEnabled(cfgPath, false, c.Args().First())
+					return lib.ToggleEnabled(configPath, dbPath, false, c.Args().First())
 				},
 			},
 
 			{
 				Name:      "enable",
+				Aliases:   []string{"e"},
 				Usage:     "Enable mod by numeric folder, codename, or ALL",
 				ArgsUsage: "<id>",
 				Action: func(ctx context.Context, c *cli.Command) error {
-					return lib.ToggleEnabled(cfgPath, true, c.Args().First())
+					return lib.ToggleEnabled(configPath, dbPath, true, c.Args().First())
 				},
 			},
 
 			{
-				Name:  "launch",
-				Usage: "Launch game with current mod setup",
+				Name:    "launch",
+				Aliases: []string{"start", "l"},
+				Usage:   "Launch game with current mod setup",
 				Action: func(ctx context.Context, c *cli.Command) error {
-					db, err := lib.EnsureDB(cfgPath)
+					cfg, err := lib.EnsureConfig(configPath)
 					if err != nil {
 						return err
 					}
 
-					if db.GameExe == "" {
-						return fmt.Errorf("game_exe is empty in config. Set it in %s", cfgPath)
+					if cfg.GameExe == "" {
+						return fmt.Errorf("game_exe is empty in %s", configPath)
 					}
 
-					lib.ScanAndUpdate(db)
-					lib.SaveDB(cfgPath, db)
-					lib.LaunchWithMods(db)
+					db, err := lib.EnsureModsDB(dbPath)
+					if err != nil {
+						return err
+					}
+
+					lib.ScanAndUpdate(cfg, db)
+
+					if err := lib.SaveModsDB(dbPath, db); err != nil {
+						return err
+					}
+
+					lib.LaunchWithMods(cfg, db)
 					return nil
 				},
 			},
@@ -75,5 +100,6 @@ func main() {
 
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
 		fmt.Println("Error:", err)
+		os.Exit(1)
 	}
 }

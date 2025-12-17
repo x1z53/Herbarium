@@ -25,10 +25,9 @@ func sortModsByName(mods []ModEntry) {
 	})
 }
 
-func PrintMods(db *DB) {
+func PrintMods(db *ModsDB) {
 	sortModsByName(db.Mods)
 
-	// ищем самое длинное CodeName
 	maxCodeLen := 0
 	for _, m := range db.Mods {
 		if len(m.CodeName) > maxCodeLen {

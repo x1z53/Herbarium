@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,41 +16,45 @@ var (
 	braceRe = regexp.MustCompile(`\{[^}]*\}`)
 )
 
-func EnsureDB(cfgPath string) (*DB, error) {
-	homeDir, _ := os.UserHomeDir()
-
-	db, err := loadDB(cfgPath)
-	if err == nil {
-		return db, nil
+func EnsureConfig(path string) (*Config, error) {
+	if c, err := LoadConfig(path); err == nil {
+		return c, nil
 	}
 
-	if !errors.Is(err, os.ErrNotExist) {
-		return nil, err
-	}
-
-	db = &DB{
+	home, _ := os.UserHomeDir()
+	c := &Config{
 		GameExe:     "/usr/bin/steam",
 		Args:        []string{"-applaunch", "331470"},
-		Root:        filepath.Join(homeDir, ".steam/steam/steamapps/workshop/content/331470"),
-		DisabledDir: filepath.Join(homeDir, ".elmod_disabled"),
-		Mods:        []ModEntry{},
+		Root:        filepath.Join(home, ".steam/steam/steamapps/workshop/content/331470"),
+		DisabledDir: filepath.Join(home, ".elmod_disabled"),
 	}
-	SaveDB(cfgPath, db)
-	fmt.Println("Created new config at", cfgPath)
-	return db, nil
+	return c, SaveConfig(path, c)
 }
 
-func ToggleEnabled(cfgPath string, enable bool, id string) error {
+func EnsureModsDB(path string) (*ModsDB, error) {
+	if db, err := LoadModsDB(path); err == nil {
+		return db, nil
+	}
+	db := &ModsDB{Mods: []ModEntry{}}
+	return db, SaveModsDB(path, db)
+}
+
+func ToggleEnabled(cfgPath, dbPath string, enable bool, id string) error {
 	if id == "" {
 		return fmt.Errorf("provide folder id, codename, or ALL")
 	}
 
-	db, err := EnsureDB(cfgPath)
+	cfg, err := EnsureConfig(cfgPath)
 	if err != nil {
 		return err
 	}
 
-	ScanAndUpdate(db)
+	db, err := EnsureModsDB(dbPath)
+	if err != nil {
+		return err
+	}
+
+	ScanAndUpdate(cfg, db)
 
 	if id == "ALL" {
 		setAllEnabled(db, enable)
@@ -61,50 +64,55 @@ func ToggleEnabled(cfgPath string, enable bool, id string) error {
 		}
 	}
 
-	SaveDB(cfgPath, db)
+	if err := SaveModsDB(dbPath, db); err != nil {
+		return err
+	}
 
 	action := map[bool]string{true: "Enabled", false: "Disabled"}[enable]
 	fmt.Printf("%s %s\n", action, id)
 	return nil
 }
 
-func loadDB(path string) (*DB, error) {
+func setEnabled(db *ModsDB, id string, enabled bool) error {
+	for i, m := range db.Mods {
+		if m.Folder == id || m.CodeName == id {
+			db.Mods[i].Enabled = enabled
+			return nil
+		}
+	}
+	return fmt.Errorf("mod not found: %s", id)
+}
+
+func setAllEnabled(db *ModsDB, enabled bool) {
+	for i := range db.Mods {
+		db.Mods[i].Enabled = enabled
+	}
+}
+
+func LoadConfig(path string) (*Config, error) {
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	var db DB
-	if err := yaml.Unmarshal(b, &db); err != nil {
-		return nil, err
-	}
-	return &db, nil
+	var c Config
+	return &c, yaml.Unmarshal(b, &c)
 }
 
-func SaveDB(path string, db *DB) error {
-	b, err := yaml.Marshal(db)
-	if err != nil {
-		return err
-	}
+func SaveConfig(path string, c *Config) error {
+	b, _ := yaml.Marshal(c)
 	return os.WriteFile(path, b, 0644)
 }
 
-func setEnabled(db *DB, id string, enabled bool) error {
-	idx := -1
-	for i, m := range db.Mods {
-		if m.Folder == id || m.CodeName == id {
-			idx = i
-			break
-		}
+func LoadModsDB(path string) (*ModsDB, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
 	}
-	if idx == -1 {
-		return fmt.Errorf("mod not found: %s", id)
-	}
-	db.Mods[idx].Enabled = enabled
-	return nil
+	var db ModsDB
+	return &db, yaml.Unmarshal(b, &db)
 }
 
-func setAllEnabled(db *DB, enabled bool) {
-	for i := range db.Mods {
-		db.Mods[i].Enabled = enabled
-	}
+func SaveModsDB(path string, db *ModsDB) error {
+	b, _ := yaml.Marshal(db)
+	return os.WriteFile(path, b, 0644)
 }
