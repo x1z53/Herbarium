@@ -17,7 +17,7 @@ A CLI utility for managing mods for the game **Everlasting Summer**, written in 
 ## Installation
 
 ```bash
-go build
+go build -o esmodmanager ./cli/
 ```
 (Meson.build coming soon)
 

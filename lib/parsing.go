@@ -2,7 +2,6 @@ package lib
 
 import (
 	"bufio"
-	"esmodmanager/lib/steamapi"
 	"io/fs"
 	"log"
 	"os"
@@ -124,7 +123,7 @@ func extractFromFolder(folder string) (codename, name string) {
 
 	if codename == "" || name == "" {
 		id := filepath.Base(folder)
-		if title, err := steamapi.FetchSteamTitle(id); err == nil && title != "" {
+		if title, err := FetchSteamTitle(id); err == nil && title != "" {
 			log.Println("Steam API success for", id)
 			if codename == "" {
 				codename = id
