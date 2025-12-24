@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <name>Herbarium</name>
+  <id>@APP_ID@</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <summary>Utility for managing mods for the game Everlasting Summer</summary>
+  <description>
+  Utility for managing mods for the game Everlasting Summer, written in Go.
+  It allows you to enable/disable mods, automatically detect mod information, launch the game with selected mods.
+  </description>
+  <launchable type="desktop-id">@APP_ID@.desktop</launchable>
+  <developer id="ru.ximper">
+    <name>Roman Alifanov</name>
+    <name xml:lang="ru">Роман Алифанов</name>
+  </developer>
+  <translation type="gettext">herbarium</translation>
+  <custom>
+    <value key="Purism::form_factor">mobile</value>
+  </custom>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+    <control>touch</control>
+  </recommends>
+  <content_rating type="oars-1.1">
+    <content_attribute id="sex-themes">mild</content_attribute>
+    <content_attribute id="language-profanity">moderate</content_attribute>
+    <content_attribute id="language-discrimination">mild</content_attribute>
+  </content_rating>
+  <url type="homepage">@HOMEPAGE@</url>
+  <url type="bugtracker">@BUGTRACKER@</url>
+  <url type="help">@HELP@</url>
+  <screenshots>
+  </screenshots>
+  <releases>
+  </releases>
+  <kudos>
+    <kudo>ModernToolkit</kudo>
+  </kudos>
+  <categories>
+    <category>Game</category>
+    <category>GNOME</category>
+    <category>GTK</category>
+  </categories>
+  <provides>
+    <binary>herbarium-gui</binary>
+  </provides>
+</component>

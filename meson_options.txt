@@ -1,0 +1,1 @@
+option('shell_completion', type: 'feature', value: 'enabled', description: 'Install shell completions')

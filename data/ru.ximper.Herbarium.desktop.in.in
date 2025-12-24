@@ -1,0 +1,15 @@
+[Desktop Entry]
+# Translators: app name should be translated
+Name=Herbarium
+Comment=Utility for managing mods for the game Everlasting Summer
+# Translators: keep number of ';'
+Keywords=es;modmanager
+Exec=herbarium-gui %U
+Icon=@APP_ID_RELEVANT@
+Terminal=false
+Type=Application
+Categories=GNOME;GTK;Game;
+StartupNotify=true
+X-SingleMainWindow=true
+X-Purism-FormFactor=Workstation;Mobile;
+X-GNOME-Gettext-Domain=herbarium

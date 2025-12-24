@@ -9,6 +9,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+const appConfigDir = "ru.ximper.Herbarium"
+
 var (
 	modsLineRe = regexp.MustCompile(
 		`(?m)^\s*\$?\s*mods\s*\[\s*["']([^"'\]]+)["']\s*\]\s*=\s*u?["']([\s\S]*?)["']`,
@@ -16,8 +18,36 @@ var (
 	braceRe = regexp.MustCompile(`\{[^}]*\}`)
 )
 
-func EnsureConfig(path string) (*Config, error) {
-	if c, err := LoadConfig(path); err == nil {
+func configDir() (string, error) {
+	base, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+	dir := filepath.Join(base, appConfigDir)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return "", err
+	}
+	return dir, nil
+}
+
+func configPath() (string, error) {
+	dir, err := configDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "config.yaml"), nil
+}
+
+func modsDBPath() (string, error) {
+	dir, err := configDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, "mods_db.yaml"), nil
+}
+
+func EnsureConfig() (*Config, error) {
+	if c, err := LoadConfig(); err == nil {
 		return c, nil
 	}
 
@@ -28,28 +58,29 @@ func EnsureConfig(path string) (*Config, error) {
 		Root:        filepath.Join(home, ".steam/steam/steamapps/workshop/content/331470"),
 		DisabledDir: filepath.Join(home, ".elmod_disabled"),
 	}
-	return c, SaveConfig(path, c)
+	return c, SaveConfig(c)
 }
 
-func EnsureModsDB(path string) (*ModsDB, error) {
-	if db, err := LoadModsDB(path); err == nil {
+func EnsureModsDB() (*ModsDB, error) {
+	if db, err := LoadModsDB(); err == nil {
 		return db, nil
 	}
+
 	db := &ModsDB{Mods: []ModEntry{}}
-	return db, SaveModsDB(path, db)
+	return db, SaveModsDB(db)
 }
 
-func ToggleEnabled(cfgPath, dbPath string, enable bool, id string) error {
+func ToggleEnabled(enable bool, id string) error {
 	if id == "" {
 		return fmt.Errorf("provide folder id, codename, or ALL")
 	}
 
-	cfg, err := EnsureConfig(cfgPath)
+	cfg, err := EnsureConfig()
 	if err != nil {
 		return err
 	}
 
-	db, err := EnsureModsDB(dbPath)
+	db, err := EnsureModsDB()
 	if err != nil {
 		return err
 	}
@@ -64,7 +95,7 @@ func ToggleEnabled(cfgPath, dbPath string, enable bool, id string) error {
 		}
 	}
 
-	if err := SaveModsDB(dbPath, db); err != nil {
+	if err := SaveModsDB(db); err != nil {
 		return err
 	}
 
@@ -89,7 +120,12 @@ func setAllEnabled(db *ModsDB, enabled bool) {
 	}
 }
 
-func LoadConfig(path string) (*Config, error) {
+func LoadConfig() (*Config, error) {
+	path, err := configPath()
+	if err != nil {
+		return nil, err
+	}
+
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -98,12 +134,22 @@ func LoadConfig(path string) (*Config, error) {
 	return &c, yaml.Unmarshal(b, &c)
 }
 
-func SaveConfig(path string, c *Config) error {
+func SaveConfig(c *Config) error {
+	path, err := configPath()
+	if err != nil {
+		return err
+	}
+
 	b, _ := yaml.Marshal(c)
 	return os.WriteFile(path, b, 0644)
 }
 
-func LoadModsDB(path string) (*ModsDB, error) {
+func LoadModsDB() (*ModsDB, error) {
+	path, err := modsDBPath()
+	if err != nil {
+		return nil, err
+	}
+
 	b, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -112,7 +158,12 @@ func LoadModsDB(path string) (*ModsDB, error) {
 	return &db, yaml.Unmarshal(b, &db)
 }
 
-func SaveModsDB(path string, db *ModsDB) error {
+func SaveModsDB(db *ModsDB) error {
 	b, _ := yaml.Marshal(db)
+	path, err := modsDBPath()
+	if err != nil {
+		return err
+	}
+
 	return os.WriteFile(path, b, 0644)
 }

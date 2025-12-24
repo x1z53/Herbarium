@@ -1,0 +1,6 @@
+cli/main.go
+data/ru.ximper.Herbarium.desktop.in.in
+data/ru.ximper.Herbarium.metainfo.xml.in.in
+gui/window.go
+lib/game.go
+lib/i18n.go

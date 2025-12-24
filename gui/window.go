@@ -47,7 +47,7 @@ type HerbariumWindow struct {
 
 func NewHerbariumWindow(app *HerbariumApp) *HerbariumWindow {
 	win := adw.NewApplicationWindow((*gtk.Application)(unsafe.Pointer(app.App)))
-	win.SetTitle("Herbarium")
+	win.SetTitle(lib.T_("Herbarium"))
 	win.SetDefaultSize(1200, 900)
 
 	mw := &HerbariumWindow{
@@ -81,7 +81,7 @@ func (mw *HerbariumWindow) createWidgets() {
 	mw.TimeDropdown = gtk.NewDropDown(nil, nil)
 	mw.SelectAllBtn = gtk.NewButton()
 	mw.DeselectAllBtn = gtk.NewButton()
-	mw.LaunchButton = gtk.NewButtonWithLabel("Launch Everlasting Summer")
+	mw.LaunchButton = gtk.NewButtonWithLabel(lib.T_("Launch Everlasting Summer"))
 	mw.Spinner = gtk.NewSpinner()
 	mw.SearchBar = gtk.NewSearchBar()
 	mw.SearchToggle = gtk.NewToggleButton()
@@ -90,12 +90,23 @@ func (mw *HerbariumWindow) createWidgets() {
 	mw.ButtonBox = gtk.NewBox(gtk.OrientationHorizontal, 8)
 	mw.BottomBox = gtk.NewBox(gtk.OrientationHorizontal, 0)
 
-	stateItems := []string{"All states", "Enabled", "Disabled"}
+	stateItems := []string{
+		lib.T_("All states"),
+		lib.T_("Enabled"),
+		lib.T_("Disabled"),
+	}
 	mw.StateList = gtk.NewStringList(stateItems)
 
 	timeItems := []string{
-		"Newest first", "Oldest first", "A to Z", "Z to A",
-		"Today", "This week", "This month", "Last 3 months", "This year",
+		lib.T_("Newest first"),
+		lib.T_("Oldest first"),
+		lib.T_("A to Z"),
+		lib.T_("Z to A"),
+		lib.T_("Today"),
+		lib.T_("This week"),
+		lib.T_("This month"),
+		lib.T_("Last 3 months"),
+		lib.T_("This year"),
 	}
 	mw.TimeList = gtk.NewStringList(timeItems)
 }
@@ -103,7 +114,7 @@ func (mw *HerbariumWindow) createWidgets() {
 func (mw *HerbariumWindow) setupUI() {
 	mw.Window.SetContent(mw.NavView)
 
-	page := adw.NewNavigationPage(mw.ToolbarView, "main")
+	page := adw.NewNavigationPage(mw.ToolbarView, lib.T_("Herbarium"))
 	mw.NavView.Add(page)
 
 	mw.ToolbarView.AddTopBar(mw.Header)
@@ -135,7 +146,7 @@ func (mw *HerbariumWindow) setupSearchBar() {
 	mw.SearchBox.AddCSSClass("linked")
 
 	mw.SearchEntry.SetHExpand(true)
-	mw.SearchEntry.SetPlaceholderText("Search mods...")
+	mw.SearchEntry.SetPlaceholderText(lib.T_("Search mods..."))
 	mw.SearchBox.Append(mw.SearchEntry)
 
 	mw.StateDropdown.SetModel(&mw.StateList.ListModel)
@@ -159,11 +170,11 @@ func (mw *HerbariumWindow) setupSearchBar() {
 	mw.Header.PackStart(mw.SearchToggle)
 
 	mw.SelectAllBtn.SetIconName("object-select-symbolic")
-	mw.SelectAllBtn.SetTooltipText("Select all")
+	mw.SelectAllBtn.SetTooltipText(lib.T_("Select all"))
 	mw.Header.PackStart(mw.SelectAllBtn)
 
 	mw.DeselectAllBtn.SetIconName("list-remove-symbolic")
-	mw.DeselectAllBtn.SetTooltipText("Clear selection")
+	mw.DeselectAllBtn.SetTooltipText(lib.T_("Clear selection"))
 	mw.Header.PackStart(mw.DeselectAllBtn)
 
 	mw.Header.PackEnd(mw.StatsLabel)
@@ -201,8 +212,8 @@ func (mw *HerbariumWindow) setupBottomBar() {
 }
 
 func (mw *HerbariumWindow) loadMods(app *HerbariumApp) {
-	cfg, _ := lib.EnsureConfig(mw.CfgPath)
-	db, _ := lib.EnsureModsDB(mw.DbPath)
+	cfg, _ := lib.EnsureConfig()
+	db, _ := lib.EnsureModsDB()
 	lib.ScanAndUpdate(cfg, db)
 
 	for i := range db.Mods {
@@ -261,8 +272,8 @@ func (mw *HerbariumWindow) connectSignals(app *HerbariumApp) {
 		mw.Spinner.Start()
 
 		go func() {
-			cfg, _ := lib.EnsureConfig(mw.CfgPath)
-			db, _ := lib.EnsureModsDB(mw.DbPath)
+			cfg, _ := lib.EnsureConfig()
+			db, _ := lib.EnsureModsDB()
 			lib.ScanAndUpdate(cfg, db)
 
 			lib.LaunchWithMods(cfg, db)
@@ -416,5 +427,9 @@ func (mw *HerbariumWindow) updateStats() {
 		}
 	}
 
-	mw.StatsLabel.SetText(fmt.Sprintf("Total: %d | Enabled: %d | Disabled: %d", total, enabled, disabled))
+	statsText := fmt.Sprintf("%s: %d | %s: %d | %s: %d",
+		lib.T_("Total"), total,
+		lib.T_("Enabled"), enabled,
+		lib.T_("Disabled"), disabled)
+	mw.StatsLabel.SetText(statsText)
 }

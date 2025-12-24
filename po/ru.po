@@ -1,0 +1,170 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the herbarium package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: herbarium\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-24 20:50+0300\n"
+"PO-Revision-Date: 2025-12-24 21:24+0300\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.8\n"
+
+#: cli/main.go:16
+msgid "Manager for Everlasting Summer mods"
+msgstr "Мод-менеджер для игры Бесконечное Лето"
+
+#: cli/main.go:21
+msgid "List known mods"
+msgstr "Список модов"
+
+#: cli/main.go:47
+msgid "Disable mod by numeric folder, codename, or ALL"
+msgstr "Отключить мод по номеру папки, кодовому имени или ALL"
+
+#: cli/main.go:57
+msgid "Enable mod by numeric folder, codename, or ALL"
+msgstr "Включить мод по номеру папки, кодовому имени или ALL"
+
+#: cli/main.go:67
+msgid "Launch game with current mod setup"
+msgstr "Запустить игру с текущей конфигурацией модов"
+
+#: cli/main.go:75
+msgid "game_exe is empty in config"
+msgstr "game_exe в конфиге пуст"
+
+#: cli/main.go:97
+msgid "Error:"
+msgstr "Ошибка:"
+
+#. Translators: app name should be translated
+#: gui/window.go:50 data/ru.ximper.Herbarium.desktop.in.in:4
+msgid "Herbarium"
+msgstr "Гербарий"
+
+#: gui/window.go:84
+msgid "Launch Everlasting Summer"
+msgstr "Запустить Бесконечное Лето"
+
+#: gui/window.go:94
+msgid "All states"
+msgstr "Все состояния"
+
+#: gui/window.go:95 gui/window.go:432
+msgid "Enabled"
+msgstr "Включен"
+
+#: gui/window.go:96 gui/window.go:433
+msgid "Disabled"
+msgstr "Выключен"
+
+#: gui/window.go:101
+msgid "Newest first"
+msgstr "Сначала новые"
+
+#: gui/window.go:102
+msgid "Oldest first"
+msgstr "Сначала старые"
+
+#: gui/window.go:103
+msgid "A to Z"
+msgstr "От А до Я"
+
+#: gui/window.go:104
+msgid "Z to A"
+msgstr "От Я до А"
+
+#: gui/window.go:105
+msgid "Today"
+msgstr "Сегодня"
+
+#: gui/window.go:106
+msgid "This week"
+msgstr "Эта неделя"
+
+#: gui/window.go:107
+msgid "This month"
+msgstr "Этот месяц"
+
+#: gui/window.go:108
+msgid "Last 3 months"
+msgstr "Последние 3 месяца"
+
+#: gui/window.go:109
+msgid "This year"
+msgstr "Этот год"
+
+#: gui/window.go:117
+msgid "main"
+msgstr ""
+
+#: gui/window.go:149
+msgid "Search mods..."
+msgstr "Искать моды..."
+
+#: gui/window.go:173
+msgid "Select all"
+msgstr "Выбрать все"
+
+#: gui/window.go:177
+msgid "Clear selection"
+msgstr "Очистить список выбранных"
+
+#: gui/window.go:431
+msgid "Total"
+msgstr "Всего"
+
+#: lib/game.go:29
+msgid "warning: destination exists, skipping restore:"
+msgstr "предупреждение: место назначения уже существует, восстановление пропущено:"
+
+#: lib/game.go:127
+msgid "Launching via Steam:"
+msgstr "Запуск с помощью Steam:"
+
+#: lib/game.go:149
+msgid "Target process exited."
+msgstr "Отслеживаемый процесс завершен."
+
+#: lib/game.go:156
+msgid "error disabling mods:"
+msgstr "ошибка выключения модов:"
+
+#: lib/game.go:162
+#, c-format
+msgid "Restoring %d folders...\n"
+msgstr "Восстановление  %d каталогов...\n"
+
+#: lib/game.go:164
+msgid "restore error:"
+msgstr "ошибка восстановления:"
+
+#: lib/game.go:173
+msgid "Interrupted — restoring..."
+msgstr "Прервано — восстановление..."
+
+#: lib/game.go:179
+msgid "game launch error:"
+msgstr "ошибка запуска игры:"
+
+#: lib/game.go:183
+msgid "Game exited — mods restored."
+msgstr "Процесс игры завершен — моды восстановлены."
+
+#: data/ru.ximper.Herbarium.desktop.in.in:5
+msgid "Utility for managing mods for the game Everlasting Summer"
+msgstr "Утилита для управления модами для игры Бесконечное Лето"
+
+#. Translators: keep number of ';'
+#: data/ru.ximper.Herbarium.desktop.in.in:7
+msgid "es;modmanager"
+msgstr "бл;модменеджер"

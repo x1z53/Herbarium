@@ -1,6 +1,7 @@
 package main
 
 import (
+	"esmodmanager/lib"
 	"os"
 
 	"github.com/diamondburned/gotk4-adwaita/pkg/adw"
@@ -34,6 +35,8 @@ func (a *HerbariumApp) Activate() {
 }
 
 func main() {
+	lib.InitLocales()
+
 	glib.LogSetDebugEnabled(false)
 
 	app := GetHerbariumApp()

@@ -75,7 +75,7 @@ func NewModCard(
 		enabled := check.Active()
 		oldEnabled := mod.Enabled
 		mod.Enabled = enabled
-		if err := lib.ToggleEnabled(cfgPath, dbPath, enabled, mod.Folder); err != nil {
+		if err := lib.ToggleEnabled(enabled, mod.Folder); err != nil {
 			mod.Enabled = oldEnabled
 			check.SetActive(oldEnabled)
 			return

@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -27,7 +26,7 @@ func restoreMoved(pairs [][2]string) error {
 		dst := pairs[i][0]
 
 		if _, err := os.Stat(dst); err == nil {
-			fmt.Println("warning: destination exists, skipping restore:", dst)
+			fmt.Println(T_("warning: destination exists, skipping restore:"), dst)
 			continue
 		}
 
@@ -81,8 +80,6 @@ func moveDisabledMods(db *ModsDB, cfg *Config) (moved [][2]string, err error) {
 		return nil, err
 	}
 
-	copy := false
-
 	for _, m := range db.Mods {
 		if !m.Enabled {
 			src := filepath.Join(root, m.Folder)
@@ -93,24 +90,6 @@ func moveDisabledMods(db *ModsDB, cfg *Config) (moved [][2]string, err error) {
 			}
 
 			if err := os.Rename(src, dst); err != nil {
-				if copy == false {
-					fmt.Printf("\033[31mERROR:\033[0m Your game folder and the disabled mods folder are on different drives.\n")
-					fmt.Printf("\033[31mMoving via os.Rename failed.\033[0m\n")
-					fmt.Printf("\033[31mMoving large folders frequently across drives can cause extra wear on SSD/HDD.\033[0m\n")
-					fmt.Printf("\033[31mConsider changing disabled_dir in the config or confirm you want to continue.\033[0m\n")
-					fmt.Print("Continue? [Y/n]: ")
-
-					reader := bufio.NewReader(os.Stdin)
-					input, _ := reader.ReadString('\n')
-					input = strings.TrimSpace(input)
-					if input != "" && strings.ToLower(input) != "y" {
-						fmt.Println("Operation cancelled by user.")
-						return nil, fmt.Errorf("operation cancelled by user")
-					} else {
-						copy = true
-					}
-				}
-
 				if err := copyDir(src, dst); err != nil {
 					return moved, err
 				}
@@ -145,7 +124,7 @@ func launchGame(exe string, args []string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
-	fmt.Println("Launching via Steam:", exe, args)
+	fmt.Println(T_("Launching via Steam:"), exe, args)
 
 	if err := cmd.Start(); err != nil {
 		return err
@@ -167,22 +146,22 @@ func launchGame(exe string, args []string) error {
 		}
 		time.Sleep(time.Second)
 	}
-	fmt.Println("Target process exited.")
+	fmt.Println(T_("Target process exited."))
 	return nil
 }
 
 func LaunchWithMods(cfg *Config, db *ModsDB) {
 	moved, err := moveDisabledMods(db, cfg)
 	if err != nil {
-		fmt.Println("error disabling mods:", err)
+		fmt.Println(T_("error disabling mods:"), err)
 		os.Exit(1)
 	}
 
 	restore := func() {
 		if len(moved) > 0 {
-			fmt.Println("Restoring", len(moved), "folders...")
+			fmt.Printf(T_("Restoring %d folders...\n"), len(moved))
 			if err := restoreMoved(moved); err != nil {
-				fmt.Println("restore error:", err)
+				fmt.Println(T_("restore error:"), err)
 			}
 		}
 	}
@@ -191,15 +170,15 @@ func LaunchWithMods(cfg *Config, db *ModsDB) {
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Println("Interrupted — restoring...")
+		fmt.Println(T_("Interrupted — restoring..."))
 		restore()
 		os.Exit(1)
 	}()
 
 	if err := launchGame(cfg.GameExe, cfg.Args); err != nil {
-		fmt.Println("game launch error:", err)
+		fmt.Println(T_("game launch error:"), err)
 	}
 
 	restore()
-	fmt.Println("Game exited — mods restored.")
+	fmt.Println(T_("Game exited — mods restored."))
 }
